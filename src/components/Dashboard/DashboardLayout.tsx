@@ -18,12 +18,25 @@ import {
   ChevronDown,
   ChevronRight,
   CheckSquare,
+  Bot,
+  Upload,
+  Sparkles,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Progress } from "@/components/ui/progress";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,6 +53,10 @@ interface DashboardLayoutProps {
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNCDropdownOpen, setIsNCDropdownOpen] = useState(false);
+  const [isTrainingDropdownOpen, setIsTrainingDropdownOpen] = useState(false);
+  const [isAIConsultantOpen, setIsAIConsultantOpen] = useState(false);
+  const [uploadedDocument, setUploadedDocument] = useState<File | null>(null);
+  const [consultantQuery, setConsultantQuery] = useState("");
 
   const certificationStages = [
     { name: "Preparation (Gap Analysis)", completed: true },
@@ -55,19 +72,21 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
 
   const navItems = [
     {
-      icon: <BookOpen className="mr-2 h-4 w-4" />,
-      label: "ISO Learning & Clauses",
-      path: "/dashboard/iso-learning",
-    },
-    {
       icon: <Home className="mr-2 h-4 w-4" />,
       label: "Dashboard",
       path: "/dashboard",
     },
     {
+      icon: <BookOpen className="mr-2 h-4 w-4" />,
+      label: "ISO 9001 Clauses",
+      path: "/dashboard/iso-learning",
+      isHighlighted: true,
+    },
+    {
       icon: <FileText className="mr-2 h-4 w-4" />,
-      label: "Document Generator",
-      path: "/dashboard/documents",
+      label: "Document Control",
+      path: "/dashboard/document-control",
+      isHighlighted: true,
     },
     {
       icon: <AlertTriangle className="mr-2 h-4 w-4" />,
@@ -83,21 +102,46 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       ],
     },
     {
-      icon: <ClipboardCheck className="mr-2 h-4 w-4" />,
-      label: "Audit Readiness",
-      path: "/dashboard/audit",
-    },
-    {
-      icon: <GitBranch className="mr-2 h-4 w-4" />,
-      label: "Process Mapping",
-      path: "/dashboard/processes",
-    },
-    {
       icon: <Users className="mr-2 h-4 w-4" />,
-      label: "Supplier Management",
-      path: "/dashboard/suppliers",
+      label: "Training",
+      path: "/dashboard/training",
+      hasDropdown: true,
+      subItems: [
+        {
+          icon: <BookOpen className="mr-2 h-4 w-4" />,
+          label: "Courses",
+          path: "/dashboard/training?tab=courses",
+        },
+        {
+          icon: <Users className="mr-2 h-4 w-4" />,
+          label: "Webinars",
+          path: "/dashboard/training?tab=webinars",
+        },
+        {
+          icon: <Users className="mr-2 h-4 w-4" />,
+          label: "Training Management",
+          path: "/dashboard/training-management",
+        },
+      ],
     },
   ];
+
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      setUploadedDocument(file);
+    }
+  };
+
+  const handleConsultantSubmit = () => {
+    // Handle AI consultant query submission
+    console.log("Document:", uploadedDocument?.name);
+    console.log("Query:", consultantQuery);
+    // Reset form
+    setUploadedDocument(null);
+    setConsultantQuery("");
+    setIsAIConsultantOpen(false);
+  };
 
   return (
     <div className="flex h-screen bg-background flex-col">
@@ -145,39 +189,57 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   {item.hasDropdown ? (
                     <div>
                       <button
-                        onClick={() => setIsNCDropdownOpen(!isNCDropdownOpen)}
+                        onClick={() => {
+                          if (item.label === "Non-Conformity Management") {
+                            setIsNCDropdownOpen(!isNCDropdownOpen);
+                          } else if (item.label === "Training") {
+                            setIsTrainingDropdownOpen(!isTrainingDropdownOpen);
+                          }
+                        }}
                         className="flex items-center justify-between w-full rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
                       >
                         <div className="flex items-center">
                           {item.icon}
                           {item.label}
                         </div>
-                        {isNCDropdownOpen ? (
+                        {(item.label === "Non-Conformity Management" &&
+                          isNCDropdownOpen) ||
+                        (item.label === "Training" &&
+                          isTrainingDropdownOpen) ? (
                           <ChevronDown className="h-4 w-4" />
                         ) : (
                           <ChevronRight className="h-4 w-4" />
                         )}
                       </button>
-                      {isNCDropdownOpen && (
+                      {((item.label === "Non-Conformity Management" &&
+                        isNCDropdownOpen) ||
+                        (item.label === "Training" &&
+                          isTrainingDropdownOpen)) && (
                         <ul className="ml-4 mt-1 space-y-1">
-                          <li>
-                            <Link
-                              to={item.path}
-                              className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-                            >
-                              {item.icon}
-                              All Non-Conformities
-                            </Link>
-                          </li>
+                          {item.label === "Non-Conformity Management" && (
+                            <li>
+                              <Link
+                                to={item.path}
+                                className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+                              >
+                                {item.icon}
+                                All Non-Conformities
+                              </Link>
+                            </li>
+                          )}
                           {item.subItems?.map((subItem, subIndex) => (
                             <li key={subIndex}>
                               <Link
-                                to="/dashboard/non-conformity"
+                                to={subItem.path}
                                 onClick={() => {
-                                  // Navigate to non-conformity page and set hash
-                                  setTimeout(() => {
-                                    window.location.hash = "capa";
-                                  }, 100);
+                                  if (
+                                    item.label === "Non-Conformity Management"
+                                  ) {
+                                    // Navigate to non-conformity page and set hash
+                                    setTimeout(() => {
+                                      window.location.hash = "capa";
+                                    }, 100);
+                                  }
                                 }}
                                 className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
                               >
@@ -192,27 +254,112 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                   ) : (
                     <Link
                       to={item.path}
-                      className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+                      className={`flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                        item.isHighlighted
+                          ? "bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 text-blue-700 font-semibold shadow-sm"
+                          : ""
+                      }`}
                     >
                       {item.icon}
                       {item.label}
+                      {item.isHighlighted && (
+                        <span className="ml-auto text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+                          Core
+                        </span>
+                      )}
                     </Link>
                   )}
                 </li>
               ))}
             </ul>
           </nav>
+
+          {/* AI Consultant Button */}
           <div className="border-t p-4">
-            <div className="flex items-center gap-3">
-              <Avatar>
-                <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=user123" />
-                <AvatarFallback>JD</AvatarFallback>
-              </Avatar>
-              <div>
-                <p className="text-sm font-medium">John Doe</p>
-                <p className="text-xs text-muted-foreground">Quality Manager</p>
-              </div>
-            </div>
+            <Dialog
+              open={isAIConsultantOpen}
+              onOpenChange={setIsAIConsultantOpen}
+            >
+              <DialogTrigger asChild>
+                <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg">
+                  <Bot className="mr-2 h-4 w-4" />
+                  <Sparkles className="mr-2 h-4 w-4" />
+                  AI Consultant
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[600px]">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center">
+                    <Bot className="mr-2 h-5 w-5 text-purple-600" />
+                    AI Consultant - ISO Clause Analysis
+                  </DialogTitle>
+                  <DialogDescription>
+                    Upload your document and ask the AI Consultant to analyze it
+                    against specific ISO 9001 clauses.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      Upload Document
+                    </label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                      <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                      <input
+                        type="file"
+                        onChange={handleFileUpload}
+                        className="hidden"
+                        id="document-upload"
+                        accept=".pdf,.doc,.docx,.txt"
+                      />
+                      <label
+                        htmlFor="document-upload"
+                        className="cursor-pointer text-sm text-gray-600 hover:text-gray-800"
+                      >
+                        {uploadedDocument ? (
+                          <span className="text-green-600 font-medium">
+                            ✓ {uploadedDocument.name}
+                          </span>
+                        ) : (
+                          <span>
+                            Click to upload or drag and drop
+                            <br />
+                            <span className="text-xs text-gray-400">
+                              PDF, DOC, DOCX, TXT up to 10MB
+                            </span>
+                          </span>
+                        )}
+                      </label>
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Your Question</label>
+                    <Textarea
+                      placeholder="Ask the AI Consultant about specific ISO clauses, e.g., 'Does my document meet the requirements of clause 4.1 - Understanding the organization and its context?'"
+                      value={consultantQuery}
+                      onChange={(e) => setConsultantQuery(e.target.value)}
+                      className="min-h-[100px]"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsAIConsultantOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleConsultantSubmit}
+                    disabled={!uploadedDocument || !consultantQuery.trim()}
+                    className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                  >
+                    <Bot className="mr-2 h-4 w-4" />
+                    Analyze Document
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </aside>
 
@@ -234,39 +381,59 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     {item.hasDropdown ? (
                       <div>
                         <button
-                          onClick={() => setIsNCDropdownOpen(!isNCDropdownOpen)}
+                          onClick={() => {
+                            if (item.label === "Non-Conformity Management") {
+                              setIsNCDropdownOpen(!isNCDropdownOpen);
+                            } else if (item.label === "Training") {
+                              setIsTrainingDropdownOpen(
+                                !isTrainingDropdownOpen,
+                              );
+                            }
+                          }}
                           className="flex items-center justify-between w-full rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
                         >
                           <div className="flex items-center">
                             {item.icon}
                             {item.label}
                           </div>
-                          {isNCDropdownOpen ? (
+                          {(item.label === "Non-Conformity Management" &&
+                            isNCDropdownOpen) ||
+                          (item.label === "Training" &&
+                            isTrainingDropdownOpen) ? (
                             <ChevronDown className="h-4 w-4" />
                           ) : (
                             <ChevronRight className="h-4 w-4" />
                           )}
                         </button>
-                        {isNCDropdownOpen && (
+                        {((item.label === "Non-Conformity Management" &&
+                          isNCDropdownOpen) ||
+                          (item.label === "Training" &&
+                            isTrainingDropdownOpen)) && (
                           <ul className="ml-4 mt-1 space-y-1">
-                            <li>
-                              <Link
-                                to={item.path}
-                                className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-                              >
-                                {item.icon}
-                                All Non-Conformities
-                              </Link>
-                            </li>
+                            {item.label === "Non-Conformity Management" && (
+                              <li>
+                                <Link
+                                  to={item.path}
+                                  className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+                                >
+                                  {item.icon}
+                                  All Non-Conformities
+                                </Link>
+                              </li>
+                            )}
                             {item.subItems?.map((subItem, subIndex) => (
                               <li key={subIndex}>
                                 <Link
-                                  to="/dashboard/non-conformity"
+                                  to={subItem.path}
                                   onClick={() => {
-                                    // Navigate to non-conformity page and set hash
-                                    setTimeout(() => {
-                                      window.location.hash = "capa";
-                                    }, 100);
+                                    if (
+                                      item.label === "Non-Conformity Management"
+                                    ) {
+                                      // Navigate to non-conformity page and set hash
+                                      setTimeout(() => {
+                                        window.location.hash = "capa";
+                                      }, 100);
+                                    }
                                   }}
                                   className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
                                 >
@@ -281,17 +448,115 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                     ) : (
                       <Link
                         to={item.path}
-                        className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+                        className={`flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                          item.isHighlighted
+                            ? "bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 text-blue-700 font-semibold shadow-sm"
+                            : ""
+                        }`}
                       >
                         {item.icon}
                         {item.label}
+                        {item.isHighlighted && (
+                          <span className="ml-auto text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+                            Core
+                          </span>
+                        )}
                       </Link>
                     )}
                   </li>
                 ))}
               </ul>
             </nav>
+
+            {/* AI Consultant Button for Mobile */}
             <div className="border-t p-4">
+              <Dialog
+                open={isAIConsultantOpen}
+                onOpenChange={setIsAIConsultantOpen}
+              >
+                <DialogTrigger asChild>
+                  <Button className="w-full bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg mb-4">
+                    <Bot className="mr-2 h-4 w-4" />
+                    <Sparkles className="mr-2 h-4 w-4" />
+                    AI Consultant
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[600px]">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center">
+                      <Bot className="mr-2 h-5 w-5 text-purple-600" />
+                      AI Consultant - ISO Clause Analysis
+                    </DialogTitle>
+                    <DialogDescription>
+                      Upload your document and ask the AI Consultant to analyze
+                      it against specific ISO 9001 clauses.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">
+                        Upload Document
+                      </label>
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                        <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                        <input
+                          type="file"
+                          onChange={handleFileUpload}
+                          className="hidden"
+                          id="document-upload-mobile"
+                          accept=".pdf,.doc,.docx,.txt"
+                        />
+                        <label
+                          htmlFor="document-upload-mobile"
+                          className="cursor-pointer text-sm text-gray-600 hover:text-gray-800"
+                        >
+                          {uploadedDocument ? (
+                            <span className="text-green-600 font-medium">
+                              ✓ {uploadedDocument.name}
+                            </span>
+                          ) : (
+                            <span>
+                              Click to upload or drag and drop
+                              <br />
+                              <span className="text-xs text-gray-400">
+                                PDF, DOC, DOCX, TXT up to 10MB
+                              </span>
+                            </span>
+                          )}
+                        </label>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">
+                        Your Question
+                      </label>
+                      <Textarea
+                        placeholder="Ask the AI Consultant about specific ISO clauses, e.g., 'Does my document meet the requirements of clause 4.1 - Understanding the organization and its context?'"
+                        value={consultantQuery}
+                        onChange={(e) => setConsultantQuery(e.target.value)}
+                        className="min-h-[100px]"
+                      />
+                    </div>
+                  </div>
+                  <DialogFooter>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsAIConsultantOpen(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleConsultantSubmit}
+                      disabled={!uploadedDocument || !consultantQuery.trim()}
+                      className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                    >
+                      <Bot className="mr-2 h-4 w-4" />
+                      Analyze Document
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+
               <div className="flex items-center gap-3">
                 <Avatar>
                   <AvatarImage src="https://api.dicebear.com/7.x/avataaars/svg?seed=user123" />
