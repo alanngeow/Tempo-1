@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { Calendar } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -73,10 +74,7 @@ const ISO9001Clauses = () => {
   // Handle URL tab parameter
   useEffect(() => {
     const tab = searchParams.get("tab");
-    if (
-      tab &&
-      ["courses", "webinars", "clauses", "ai-chat", "progress"].includes(tab)
-    ) {
+    if (tab && ["clauses", "ai-chat", "progress"].includes(tab)) {
       setActiveTab(tab);
     }
   }, [searchParams]);
@@ -1284,11 +1282,11 @@ This ${documentType} applies to all activities related to ${clauseTitle.toLowerC
   );
 
   return (
-    <div className="bg-white min-h-screen p-6">
+    <div className="min-h-full p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2 flex items-center">
           <BookOpen className="mr-3 h-8 w-8 text-primary" />
-          ISO 9001 Clauses Koo Koo Kii Kii
+          ISO 9001 Clauses
         </h1>
         <p className="text-muted-foreground">
           Interactive learning modules for each ISO 9001:2015 clause with
@@ -1303,8 +1301,6 @@ This ${documentType} applies to all activities related to ${clauseTitle.toLowerC
       >
         <TabsList>
           <TabsTrigger value="clauses">Clauses</TabsTrigger>
-          <TabsTrigger value="courses">Courses</TabsTrigger>
-          <TabsTrigger value="webinars">Webinars</TabsTrigger>
           <TabsTrigger value="ai-chat">AI Consultant</TabsTrigger>
           <TabsTrigger value="progress">My Progress</TabsTrigger>
         </TabsList>
@@ -1760,172 +1756,6 @@ This ${documentType} applies to all activities related to ${clauseTitle.toLowerC
                     </CollapsibleContent>
                   </Collapsible>
                 </CardHeader>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="courses" className="space-y-6">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-2 flex items-center">
-              <BookOpen className="mr-3 h-6 w-6 text-primary" />
-              ISO 9001 Training Courses
-            </h2>
-            <p className="text-muted-foreground">
-              Comprehensive training courses to build your ISO 9001 expertise
-            </p>
-          </div>
-
-          <div className="mb-6">
-            <div className="relative">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search courses..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 max-w-sm"
-              />
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCourses.map((course) => (
-              <Card
-                key={course.id}
-                className="hover:shadow-lg transition-shadow"
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between mb-4">
-                    <Badge
-                      variant="secondary"
-                      className={`${
-                        course.difficulty === "Beginner"
-                          ? "bg-green-100 text-green-800"
-                          : course.difficulty === "Intermediate"
-                            ? "bg-yellow-100 text-yellow-800"
-                            : "bg-red-100 text-red-800"
-                      }`}
-                    >
-                      {course.difficulty}
-                    </Badge>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Star className="h-4 w-4 fill-yellow-400 text-yellow-400 mr-1" />
-                      {course.rating}
-                    </div>
-                  </div>
-
-                  <h3 className="font-semibold text-lg mb-2">{course.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {course.description}
-                  </p>
-
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="flex items-center">
-                        <Clock className="h-4 w-4 mr-1" />
-                        {course.duration}
-                      </span>
-                      <span className="flex items-center">
-                        <BookOpen className="h-4 w-4 mr-1" />
-                        {course.modules} modules
-                      </span>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span>Progress</span>
-                        <span>{course.progress}%</span>
-                      </div>
-                      <Progress value={course.progress} className="h-2" />
-                    </div>
-
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>{course.enrolled} enrolled</span>
-                      <Badge variant="outline">{course.category}</Badge>
-                    </div>
-                  </div>
-
-                  <div className="mt-4 pt-4 border-t">
-                    <Button className="w-full" size="sm">
-                      <Play className="mr-2 h-4 w-4" />
-                      {course.progress > 0 ? "Continue" : "Start Course"}
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </TabsContent>
-
-        <TabsContent value="webinars" className="space-y-6">
-          <div className="mb-6">
-            <h2 className="text-2xl font-bold mb-2 flex items-center">
-              <Video className="mr-3 h-6 w-6 text-primary" />
-              ISO 9001 Webinars
-            </h2>
-            <p className="text-muted-foreground">
-              Live and recorded webinars from industry experts
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            {webinars.map((webinar) => (
-              <Card
-                key={webinar.id}
-                className="hover:shadow-md transition-shadow"
-              >
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-2 mb-2">
-                        <h3 className="font-semibold text-lg">
-                          {webinar.title}
-                        </h3>
-                        <Badge
-                          variant="secondary"
-                          className={`${
-                            webinar.status === "upcoming"
-                              ? "bg-blue-100 text-blue-800"
-                              : "bg-green-100 text-green-800"
-                          }`}
-                        >
-                          {webinar.status === "upcoming"
-                            ? "Upcoming"
-                            : "Recorded"}
-                        </Badge>
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-3">
-                        Presented by {webinar.presenter}
-                      </p>
-                      <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                        <span className="flex items-center">
-                          <Calendar className="h-4 w-4 mr-1" />
-                          {new Date(webinar.date).toLocaleDateString()}
-                        </span>
-                        <span className="flex items-center">
-                          <Clock className="h-4 w-4 mr-1" />
-                          {webinar.time}
-                        </span>
-                        <span className="flex items-center">
-                          <Users className="h-4 w-4 mr-1" />
-                          {webinar.attendees} attendees
-                        </span>
-                      </div>
-                    </div>
-                    <div className="ml-4">
-                      <Button
-                        variant={
-                          webinar.status === "upcoming" ? "default" : "outline"
-                        }
-                        size="sm"
-                      >
-                        {webinar.status === "upcoming"
-                          ? "Register"
-                          : "Watch Recording"}
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
               </Card>
             ))}
           </div>

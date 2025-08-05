@@ -10,6 +10,7 @@ import NonConformityManagement from "./components/Dashboard/pages/NonConformityM
 import ISO9001Clauses from "./components/Dashboard/pages/LearningCenter";
 import DocumentControl from "./components/Dashboard/pages/DocumentControl";
 import TrainingManagement from "./components/Dashboard/pages/TrainingManagement";
+import CustomerComplaintManagement from "./components/Dashboard/pages/CustomerComplaintManagement";
 import routes from "tempo-routes";
 
 // Dashboard Home Component
@@ -84,23 +85,13 @@ const SupplierManagement = () => (
 // Use the imported ISO9001Clauses component
 const ISOLearningAndClauses = () => {
   console.log("ISOLearningAndClauses component rendered");
-  return (
-    <div className="bg-white min-h-screen p-4">
-      <h1 className="text-2xl font-bold mb-4">ISO Learning and Clauses</h1>
-      <ISO9001Clauses />
-    </div>
-  );
+  return <ISO9001Clauses />;
 };
 
 // Training component that handles courses and webinars tabs
 const Training = () => {
   console.log("Training component rendered");
-  return (
-    <div className="bg-white min-h-screen p-4">
-      <h1 className="text-2xl font-bold mb-4">Training Section</h1>
-      <ISO9001Clauses />
-    </div>
-  );
+  return <ISO9001Clauses />;
 };
 
 function App() {
@@ -117,6 +108,10 @@ function App() {
             <Route path="audit" element={<AuditReadiness />} />
             <Route path="processes" element={<ProcessMapping />} />
             <Route path="suppliers" element={<SupplierManagement />} />
+            <Route
+              path="customer-complaints" //this is working
+              element={<CustomerComplaintManagement />}
+            />
             <Route
               path="non-conformity"
               element={<NonConformityManagement />}

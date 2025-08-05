@@ -12,7 +12,7 @@ const basename = import.meta.env.BASE_URL;
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <BrowserRouter basename={basename}>
-      <App />
+      <App /> //App.tsx
     </BrowserRouter>
   </React.StrictMode>,
 );

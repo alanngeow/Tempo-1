@@ -126,42 +126,6 @@ interface Document {
   size: string;
 }
 
-interface CustomerComplaint {
-  id: string;
-  customerName: string;
-  customerEmail: string;
-  customerPhone?: string;
-  complaintDate: string;
-  productService: string;
-  complaintDescription: string;
-  severity: "Low" | "Medium" | "High" | "Critical";
-  status: "Open" | "Resolved";
-  assignedTo?: string;
-  rootCauseId?: string;
-  rootCauseDescription?: string;
-  correctiveActions: CorrectiveAction[];
-  resolutionDate?: string;
-  customerSatisfaction?:
-    | "Very Satisfied"
-    | "Satisfied"
-    | "Neutral"
-    | "Dissatisfied"
-    | "Very Dissatisfied";
-  followUpRequired: boolean;
-  attachments?: string[];
-  internalNotes?: string;
-}
-
-interface CorrectiveAction {
-  id: string;
-  description: string;
-  assignedTo: string;
-  dueDate: string;
-  status: "Pending" | "In Progress" | "Completed";
-  completedDate?: string;
-  notes?: string;
-}
-
 const DocumentControl = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(
     null,
@@ -179,30 +143,6 @@ const DocumentControl = () => {
     reviewer: "",
     dueDate: "",
     status: "pending",
-  });
-
-  // Customer Complaint Form State
-  const [customerComplaints, setCustomerComplaints] = useState<
-    CustomerComplaint[]
-  >([]);
-  const [isComplaintFormOpen, setIsComplaintFormOpen] = useState(false);
-  const [selectedComplaint, setSelectedComplaint] =
-    useState<CustomerComplaint | null>(null);
-  const [complaintForm, setComplaintForm] = useState({
-    customerName: "",
-    customerEmail: "",
-    customerPhone: "",
-    productService: "",
-    complaintDescription: "",
-    severity: "Medium" as "Low" | "Medium" | "High" | "Critical",
-    assignedTo: "",
-    rootCauseDescription: "",
-    internalNotes: "",
-  });
-  const [newCorrectiveAction, setNewCorrectiveAction] = useState({
-    description: "",
-    assignedTo: "",
-    dueDate: "",
   });
 
   // Pre-made templates from AI document generator
@@ -526,82 +466,6 @@ const DocumentControl = () => {
     },
   ]);
 
-  // Initialize sample customer complaints
-  React.useEffect(() => {
-    const sampleComplaints: CustomerComplaint[] = [
-      {
-        id: "CC-2024-001",
-        customerName: "John Smith",
-        customerEmail: "john.smith@email.com",
-        customerPhone: "+1-555-0123",
-        complaintDate: "2024-01-20",
-        productService: "Widget Pro Model X",
-        complaintDescription:
-          "Product arrived damaged with visible cracks on the surface. Packaging appeared intact but product was clearly damaged during shipping or manufacturing.",
-        severity: "High",
-        status: "Open",
-        assignedTo: "Customer Service Manager",
-        rootCauseId: "RC-001",
-        rootCauseDescription:
-          "Inadequate packaging protection for fragile components during shipping",
-        correctiveActions: [
-          {
-            id: "CA-001",
-            description:
-              "Review and upgrade packaging materials for fragile products",
-            assignedTo: "Packaging Engineer",
-            dueDate: "2024-02-15",
-            status: "In Progress",
-            notes: "Evaluating foam inserts and reinforced boxes",
-          },
-          {
-            id: "CA-002",
-            description: "Implement additional quality checks before shipping",
-            assignedTo: "QC Inspector",
-            dueDate: "2024-02-10",
-            status: "Pending",
-          },
-        ],
-        followUpRequired: true,
-        internalNotes:
-          "Customer is a long-term client, priority resolution required",
-      },
-      {
-        id: "CC-2024-002",
-        customerName: "Sarah Johnson",
-        customerEmail: "sarah.j@company.com",
-        complaintDate: "2024-01-18",
-        productService: "Premium Service Package",
-        complaintDescription:
-          "Service technician arrived 2 hours late without prior notification. Work quality was satisfactory but communication was poor.",
-        severity: "Medium",
-        status: "Resolved",
-        assignedTo: "Service Manager",
-        rootCauseId: "RC-002",
-        rootCauseDescription:
-          "Lack of real-time communication system between dispatch and customers",
-        correctiveActions: [
-          {
-            id: "CA-003",
-            description:
-              "Implement automated SMS notification system for service appointments",
-            assignedTo: "IT Manager",
-            dueDate: "2024-01-25",
-            status: "Completed",
-            completedDate: "2024-01-24",
-            notes: "SMS system deployed and tested successfully",
-          },
-        ],
-        resolutionDate: "2024-01-25",
-        customerSatisfaction: "Satisfied",
-        followUpRequired: false,
-        internalNotes:
-          "Customer appreciated quick resolution and proactive communication",
-      },
-    ];
-    setCustomerComplaints(sampleComplaints);
-  }, []);
-
   const handleSaveTemplate = () => {
     if (selectedTemplate) {
       const updatedTemplates = templates.map((t) =>
@@ -751,172 +615,6 @@ const DocumentControl = () => {
       .replace(/\[APPROVER_NAME\]/g, "Approver Name");
   };
 
-  // Customer Complaint Handlers
-  const handleCreateComplaint = () => {
-    if (
-      !complaintForm.customerName ||
-      !complaintForm.customerEmail ||
-      !complaintForm.complaintDescription
-    ) {
-      alert("Please fill in all required fields");
-      return;
-    }
-
-    const newComplaint: CustomerComplaint = {
-      id: `CC-2024-${String(customerComplaints.length + 1).padStart(3, "0")}`,
-      customerName: complaintForm.customerName,
-      customerEmail: complaintForm.customerEmail,
-      customerPhone: complaintForm.customerPhone,
-      complaintDate: new Date().toISOString().split("T")[0],
-      productService: complaintForm.productService,
-      complaintDescription: complaintForm.complaintDescription,
-      severity: complaintForm.severity,
-      status: "Open",
-      assignedTo: complaintForm.assignedTo,
-      rootCauseDescription: complaintForm.rootCauseDescription,
-      correctiveActions: [],
-      followUpRequired: true,
-      internalNotes: complaintForm.internalNotes,
-    };
-
-    setCustomerComplaints([newComplaint, ...customerComplaints]);
-    setComplaintForm({
-      customerName: "",
-      customerEmail: "",
-      customerPhone: "",
-      productService: "",
-      complaintDescription: "",
-      severity: "Medium",
-      assignedTo: "",
-      rootCauseDescription: "",
-      internalNotes: "",
-    });
-    setIsComplaintFormOpen(false);
-  };
-
-  const handleAddCorrectiveAction = (complaintId: string) => {
-    if (
-      !newCorrectiveAction.description ||
-      !newCorrectiveAction.assignedTo ||
-      !newCorrectiveAction.dueDate
-    ) {
-      alert("Please fill in all corrective action fields");
-      return;
-    }
-
-    const action: CorrectiveAction = {
-      id: `CA-${Date.now()}`,
-      description: newCorrectiveAction.description,
-      assignedTo: newCorrectiveAction.assignedTo,
-      dueDate: newCorrectiveAction.dueDate,
-      status: "Pending",
-    };
-
-    setCustomerComplaints((prev) =>
-      prev.map((complaint) =>
-        complaint.id === complaintId
-          ? {
-              ...complaint,
-              correctiveActions: [...complaint.correctiveActions, action],
-            }
-          : complaint,
-      ),
-    );
-
-    setNewCorrectiveAction({
-      description: "",
-      assignedTo: "",
-      dueDate: "",
-    });
-  };
-
-  const handleUpdateComplaintStatus = (
-    complaintId: string,
-    status: "Open" | "Resolved",
-  ) => {
-    setCustomerComplaints((prev) =>
-      prev.map((complaint) =>
-        complaint.id === complaintId
-          ? {
-              ...complaint,
-              status,
-              resolutionDate:
-                status === "Resolved"
-                  ? new Date().toISOString().split("T")[0]
-                  : undefined,
-            }
-          : complaint,
-      ),
-    );
-  };
-
-  const handleUpdateActionStatus = (
-    complaintId: string,
-    actionId: string,
-    status: CorrectiveAction["status"],
-  ) => {
-    setCustomerComplaints((prev) =>
-      prev.map((complaint) =>
-        complaint.id === complaintId
-          ? {
-              ...complaint,
-              correctiveActions: complaint.correctiveActions.map((action) =>
-                action.id === actionId
-                  ? {
-                      ...action,
-                      status,
-                      completedDate:
-                        status === "Completed"
-                          ? new Date().toISOString().split("T")[0]
-                          : undefined,
-                    }
-                  : action,
-              ),
-            }
-          : complaint,
-      ),
-    );
-  };
-
-  const getComplaintStatusColor = (status: string) => {
-    switch (status) {
-      case "Open":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "Resolved":
-        return "bg-green-100 text-green-800 border-green-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  const getSeverityColor = (severity: string) => {
-    switch (severity) {
-      case "Critical":
-        return "bg-red-100 text-red-800 border-red-200";
-      case "High":
-        return "bg-orange-100 text-orange-800 border-orange-200";
-      case "Medium":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
-      case "Low":
-        return "bg-green-100 text-green-800 border-green-200";
-      default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
-    }
-  };
-
-  const getActionStatusColor = (status: string) => {
-    switch (status) {
-      case "Pending":
-        return "bg-gray-100 text-gray-800";
-      case "In Progress":
-        return "bg-blue-100 text-blue-800";
-      case "Completed":
-        return "bg-green-100 text-green-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
   return (
     <div className="bg-white min-h-screen p-6">
       <div className="max-w-7xl mx-auto space-y-6">
@@ -945,11 +643,10 @@ const DocumentControl = () => {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="templates">Pre-made Templates</TabsTrigger>
             <TabsTrigger value="documents">Document Library</TabsTrigger>
-            <TabsTrigger value="complaints">Customer Complaints</TabsTrigger>
             <TabsTrigger value="control">Version Control</TabsTrigger>
           </TabsList>
 
@@ -1869,291 +1566,29 @@ const DocumentControl = () => {
             </Card>
           </TabsContent>
 
-          {/* Customer Complaints Tab */}
+          {/* Customer Complaints Tab - Moved to separate component */}
           <TabsContent value="complaints" className="space-y-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold">Customer Complaints</h2>
-                <p className="text-gray-600">
-                  Manage customer complaints with linked root causes and
-                  corrective actions
-                </p>
-              </div>
-              <Button onClick={() => setIsComplaintFormOpen(true)}>
-                <Plus className="mr-2 h-4 w-4" />
-                New Complaint
-              </Button>
-            </div>
-
-            {/* Complaints Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Total Complaints
-                  </CardTitle>
-                  <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">
-                    {customerComplaints.length}
-                  </div>
-                  <p className="text-xs text-muted-foreground">All time</p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Open</CardTitle>
-                  <AlertCircle className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-red-600">
-                    {
-                      customerComplaints.filter((c) => c.status === "Open")
-                        .length
-                    }
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Require attention
+            <Card>
+              <CardContent className="flex items-center justify-center py-8">
+                <div className="text-center">
+                  <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                  <p className="text-lg font-medium text-muted-foreground">
+                    Customer Complaints Moved
                   </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    Resolved
-                  </CardTitle>
-                  <CheckCircle className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-green-600">
-                    {
-                      customerComplaints.filter((c) => c.status === "Resolved")
-                        .length
-                    }
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Successfully closed
+                  <p className="text-sm text-muted-foreground mb-4">
+                    Customer complaint management has been moved to its own
+                    dedicated section
                   </p>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">
-                    High Priority
-                  </CardTitle>
-                  <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold text-orange-600">
-                    {
-                      customerComplaints.filter(
-                        (c) =>
-                          c.severity === "High" || c.severity === "Critical",
-                      ).length
+                  <Button
+                    onClick={() =>
+                      (window.location.href = "/dashboard/customer-complaints")
                     }
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    Critical & High
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Complaints List */}
-            <div className="space-y-4">
-              {customerComplaints.length === 0 ? (
-                <Card>
-                  <CardContent className="flex items-center justify-center py-8">
-                    <div className="text-center">
-                      <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                      <p className="text-lg font-medium text-muted-foreground">
-                        No customer complaints
-                      </p>
-                      <p className="text-sm text-muted-foreground">
-                        Customer complaints will appear here
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                customerComplaints.map((complaint) => (
-                  <Card
-                    key={complaint.id}
-                    className="hover:shadow-md transition-shadow"
                   >
-                    <CardHeader>
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-2 flex-1">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <CardTitle className="text-lg">
-                              {complaint.id}
-                            </CardTitle>
-                            <Badge
-                              className={getComplaintStatusColor(
-                                complaint.status,
-                              )}
-                            >
-                              {complaint.status}
-                            </Badge>
-                            <Badge
-                              className={getSeverityColor(complaint.severity)}
-                            >
-                              {complaint.severity}
-                            </Badge>
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <p>
-                                <strong>Customer:</strong>{" "}
-                                {complaint.customerName}
-                              </p>
-                              <p>
-                                <strong>Email:</strong>{" "}
-                                {complaint.customerEmail}
-                              </p>
-                              {complaint.customerPhone && (
-                                <p>
-                                  <strong>Phone:</strong>{" "}
-                                  {complaint.customerPhone}
-                                </p>
-                              )}
-                            </div>
-                            <div>
-                              <p>
-                                <strong>Product/Service:</strong>{" "}
-                                {complaint.productService}
-                              </p>
-                              <p>
-                                <strong>Date:</strong> {complaint.complaintDate}
-                              </p>
-                              {complaint.assignedTo && (
-                                <p>
-                                  <strong>Assigned to:</strong>{" "}
-                                  {complaint.assignedTo}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                          <div>
-                            <p>
-                              <strong>Description:</strong>
-                            </p>
-                            <p className="text-sm text-muted-foreground mt-1">
-                              {complaint.complaintDescription}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex gap-2 flex-shrink-0">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setSelectedComplaint(complaint)}
-                          >
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Details
-                          </Button>
-                          <Select
-                            value={complaint.status}
-                            onValueChange={(value: "Open" | "Resolved") =>
-                              handleUpdateComplaintStatus(complaint.id, value)
-                            }
-                          >
-                            <SelectTrigger className="w-[120px]">
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="Open">Open</SelectItem>
-                              <SelectItem value="Resolved">Resolved</SelectItem>
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      </div>
-                    </CardHeader>
-
-                    {/* Root Cause Section */}
-                    {complaint.rootCauseDescription && (
-                      <CardContent className="pt-0">
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                          <h4 className="font-medium text-blue-900 mb-2 flex items-center gap-2">
-                            <Lightbulb className="h-4 w-4" />
-                            Root Cause Analysis
-                          </h4>
-                          <p className="text-sm text-blue-800">
-                            {complaint.rootCauseDescription}
-                          </p>
-                        </div>
-                      </CardContent>
-                    )}
-
-                    {/* Corrective Actions Section */}
-                    {complaint.correctiveActions.length > 0 && (
-                      <CardContent className="pt-0">
-                        <div className="space-y-3">
-                          <h4 className="font-medium flex items-center gap-2">
-                            <Wrench className="h-4 w-4" />
-                            Corrective Actions (
-                            {complaint.correctiveActions.length})
-                          </h4>
-                          <div className="space-y-2">
-                            {complaint.correctiveActions.map((action) => (
-                              <div
-                                key={action.id}
-                                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-                              >
-                                <div className="flex-1">
-                                  <p className="font-medium text-sm">
-                                    {action.description}
-                                  </p>
-                                  <div className="flex items-center gap-4 text-xs text-muted-foreground mt-1">
-                                    <span>
-                                      Assigned to: {action.assignedTo}
-                                    </span>
-                                    <span>Due: {action.dueDate}</span>
-                                    {action.completedDate && (
-                                      <span className="text-green-600">
-                                        Completed: {action.completedDate}
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                                <Select
-                                  value={action.status}
-                                  onValueChange={(
-                                    value: CorrectiveAction["status"],
-                                  ) =>
-                                    handleUpdateActionStatus(
-                                      complaint.id,
-                                      action.id,
-                                      value,
-                                    )
-                                  }
-                                >
-                                  <SelectTrigger className="w-[120px]">
-                                    <SelectValue />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="Pending">
-                                      Pending
-                                    </SelectItem>
-                                    <SelectItem value="In Progress">
-                                      In Progress
-                                    </SelectItem>
-                                    <SelectItem value="Completed">
-                                      Completed
-                                    </SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </CardContent>
-                    )}
-                  </Card>
-                ))
-              )}
-            </div>
+                    Go to Customer Complaints
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Version Control Tab */}
