@@ -22,6 +22,9 @@ import {
   Upload,
   Sparkles,
   MessageSquare,
+  GraduationCap,
+  Video,
+  Calendar,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -54,6 +57,7 @@ interface DashboardLayoutProps {
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isNCDropdownOpen, setIsNCDropdownOpen] = useState(false);
+  const [isTrainingDropdownOpen, setIsTrainingDropdownOpen] = useState(false);
 
   const [isAIConsultantOpen, setIsAIConsultantOpen] = useState(false);
   const [uploadedDocument, setUploadedDocument] = useState<File | null>(null);
@@ -87,13 +91,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       icon: <FileText className="mr-2 h-4 w-4" />,
       label: "Document Control",
       path: "/dashboard/document-control",
-      isHighlighted: true,
     },
     {
       icon: <MessageSquare className="mr-2 h-4 w-4" />,
       label: "Customer Complaints",
       path: "/dashboard/customer-complaints",
-      isHighlighted: true,
     },
     {
       icon: <AlertTriangle className="mr-2 h-4 w-4" />,
@@ -105,6 +107,29 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
           icon: <CheckSquare className="mr-2 h-4 w-4" />,
           label: "CAPA Management",
           path: "/dashboard/non-conformity#capa",
+        },
+      ],
+    },
+    {
+      icon: <GraduationCap className="mr-2 h-4 w-4" />,
+      label: "Training",
+      path: "/dashboard/training",
+      hasDropdown: true,
+      subItems: [
+        {
+          icon: <BookOpen className="mr-2 h-4 w-4" />,
+          label: "Courses",
+          path: "/dashboard/training/courses",
+        },
+        {
+          icon: <Video className="mr-2 h-4 w-4" />,
+          label: "Webinars",
+          path: "/dashboard/training/webinars",
+        },
+        {
+          icon: <Calendar className="mr-2 h-4 w-4" />,
+          label: "Training Management",
+          path: "/dashboard/training/management",
         },
       ],
     },
@@ -176,58 +201,73 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                         onClick={() => {
                           if (item.label === "Non-Conformity Management") {
                             setIsNCDropdownOpen(!isNCDropdownOpen);
+                          } else if (item.label === "Training") {
+                            setIsTrainingDropdownOpen(!isTrainingDropdownOpen);
                           }
                         }}
-                        className="flex items-center justify-between w-full rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+                        className={`flex items-start justify-between w-full rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground text-left ${
+                          item.isHighlighted
+                            ? "bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 text-blue-700 font-semibold shadow-sm"
+                            : ""
+                        }`}
                       >
                         <div className="flex items-center">
                           {item.icon}
                           {item.label}
+                          {item.isHighlighted && (
+                            <span className="ml-auto mr-2 text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+                              Core
+                            </span>
+                          )}
                         </div>
-                        {item.label === "Non-Conformity Management" &&
-                        isNCDropdownOpen ? (
+                        {(item.label === "Non-Conformity Management" &&
+                          isNCDropdownOpen) ||
+                        (item.label === "Training" &&
+                          isTrainingDropdownOpen) ? (
                           <ChevronDown className="h-4 w-4" />
                         ) : (
                           <ChevronRight className="h-4 w-4" />
                         )}
                       </button>
-                      {item.label === "Non-Conformity Management" &&
-                        isNCDropdownOpen && (
-                          <ul className="ml-4 mt-1 space-y-1">
-                            {item.label === "Non-Conformity Management" && (
-                              <li>
-                                <Link
-                                  to={item.path}
-                                  className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-                                >
-                                  {item.icon}
-                                  All Non-Conformities
-                                </Link>
-                              </li>
-                            )}
-                            {item.subItems?.map((subItem, subIndex) => (
-                              <li key={subIndex}>
-                                <Link
-                                  to={subItem.path}
-                                  onClick={() => {
-                                    if (
-                                      item.label === "Non-Conformity Management"
-                                    ) {
-                                      // Navigate to non-conformity page and set hash
-                                      setTimeout(() => {
-                                        window.location.hash = "capa";
-                                      }, 100);
-                                    }
-                                  }}
-                                  className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
-                                >
-                                  {subItem.icon}
-                                  {subItem.label}
-                                </Link>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
+                      {((item.label === "Non-Conformity Management" &&
+                        isNCDropdownOpen) ||
+                        (item.label === "Training" &&
+                          isTrainingDropdownOpen)) && (
+                        <ul className="ml-4 mt-1 space-y-1">
+                          {item.label === "Non-Conformity Management" && (
+                            <li>
+                              <Link
+                                to={item.path}
+                                className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+                              >
+                                {item.icon}
+                                All Non-Conformities
+                              </Link>
+                            </li>
+                          )}
+                          {item.subItems?.map((subItem, subIndex) => (
+                            <li key={subIndex}>
+                              <Link
+                                to={subItem.path}
+                                onClick={() => {
+                                  if (
+                                    item.label === "Non-Conformity Management"
+                                  ) {
+                                    // Navigate to non-conformity page and set hash
+                                    setTimeout(() => {
+                                      window.location.hash = "capa";
+                                    }, 100);
+                                  }
+                                }}
+                                className="flex items-center rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+                              >
+                                {subItem.icon}
+                                {subItem.label}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </div>
                   ) : (
                     <Link
@@ -368,11 +408,20 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
                               );
                             }
                           }}
-                          className="flex items-center justify-between w-full rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground"
+                          className={`flex items-center justify-between w-full rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground ${
+                            item.isHighlighted
+                              ? "bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 text-blue-700 font-semibold shadow-sm"
+                              : ""
+                          }`}
                         >
                           <div className="flex items-center">
                             {item.icon}
                             {item.label}
+                            {item.isHighlighted && (
+                              <span className="ml-auto mr-2 text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+                                Core
+                              </span>
+                            )}
                           </div>
                           {(item.label === "Non-Conformity Management" &&
                             isNCDropdownOpen) ||
